@@ -219,14 +219,6 @@ local set_annotations = function()
 end
 
 --- Creates User Commands put here so we can have localised behaviour.
-local function create_usr_cmds()
-    vim.api.nvim_create_user_command('NoteCreate', require('code_annotate').create_annotation, {})
-    vim.api.nvim_create_user_command('NoteDelete', require('code_annotate').delete_annotation, {})
-    vim.api.nvim_create_user_command('NoteView', require('code_annotate').preview_annotation, {})
-    vim.api.nvim_create_user_command('NoteTelescope', 'Telescope code_annotate current', {})
-    -- vim.api.nvim_create_user_command('NoteList', require('code_annotate').list_anno_locs, {})
-end
-
 --- @class code_annotate.setup.config_opts
 --- @field annot_sign string
 --- @field annot_sign_hl string
@@ -250,8 +242,6 @@ local default_opts = {
 function M.setup(opts)
     M.config = vim.tbl_deep_extend('force', default_opts, opts or {})
     require 'sqlite.db' { uri = M.config.db_path, anno_tbl = db.anno_tbl, opts = {} }
-
-    create_usr_cmds()
 
     local anno_set_ag = vim.api.nvim_create_augroup('CodeAnnoSetAnno', { clear = true })
     vim.api.nvim_create_autocmd('BufEnter', {
