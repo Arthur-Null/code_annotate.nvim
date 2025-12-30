@@ -6,6 +6,12 @@ local utils = require 'code_annotate.utils'
 local curr_extmarks = {}
 local monitored_bufs = {}
 
+local function ensure_setup()
+    if not M.config then
+        M.setup {}
+    end
+end
+
 --- Creates a buffer and window for annotation. If nothing exists it creates one else it clears the old one and returns it.
 --- @return integer
 local function create_anno_buf()
@@ -52,6 +58,7 @@ end
 
 --- Creates an annotation in the current line.
 function M.create_annotation()
+    ensure_setup()
     local bufnr = vim.api.nvim_get_current_buf()
     local file_name = vim.api.nvim_buf_get_name(bufnr)
     local cur_row = vim.api.nvim_win_get_cursor(0)[1] - 1
@@ -93,6 +100,7 @@ end
 
 --- Deletes the annotation in the current line.
 function M.delete_annotation()
+    ensure_setup()
     local bufnr = vim.api.nvim_get_current_buf()
     local file_name = vim.api.nvim_buf_get_name(bufnr)
     local cur_row = vim.api.nvim_win_get_cursor(0)[1] - 1
@@ -122,6 +130,7 @@ end
 
 --- Shows a Unmodifiable preview of the annotation in the current line.
 function M.preview_annotation()
+    ensure_setup()
     local bufnr = vim.api.nvim_get_current_buf()
     local file_name = vim.api.nvim_buf_get_name(bufnr)
     local cur_row = vim.api.nvim_win_get_cursor(0)[1] - 1
@@ -220,10 +229,22 @@ end
 
 --- Creates User Commands put here so we can have localised behaviour.
 local function create_usr_cmds()
-    vim.api.nvim_create_user_command('NoteCreate', require('code_annotate').create_annotation, {})
-    vim.api.nvim_create_user_command('NoteDelete', require('code_annotate').delete_annotation, {})
-    vim.api.nvim_create_user_command('NoteView', require('code_annotate').preview_annotation, {})
-    vim.api.nvim_create_user_command('NoteTelescope', 'Telescope code_annotate current', {})
+    local function command_exists(cmd)
+        return vim.fn.exists(':' .. cmd) == 2
+    end
+
+    if not command_exists('NoteCreate') then
+        vim.api.nvim_create_user_command('NoteCreate', require('code_annotate').create_annotation, {})
+    end
+    if not command_exists('NoteDelete') then
+        vim.api.nvim_create_user_command('NoteDelete', require('code_annotate').delete_annotation, {})
+    end
+    if not command_exists('NoteView') then
+        vim.api.nvim_create_user_command('NoteView', require('code_annotate').preview_annotation, {})
+    end
+    if not command_exists('NoteTelescope') then
+        vim.api.nvim_create_user_command('NoteTelescope', 'Telescope code_annotate current', {})
+    end
     -- vim.api.nvim_create_user_command('NoteList', require('code_annotate').list_anno_locs, {})
 end
 
